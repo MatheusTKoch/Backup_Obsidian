@@ -5,12 +5,13 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
+arquivo_token = 'token.pickle'
 
 credentials = None
 
 #Verifica arquivo token.pickle para credenciais
-if os.path.exists('token.pickle'):
-    with open('token.pickle', 'rb') as token:
+if os.path.exists(arquivo_token):
+    with open(arquivo_token, 'rb') as token:
         credentials = pickle.load(token)
 
 #Solicita login se nao encontrado arquivo
@@ -21,10 +22,10 @@ if not credentials or not credentials.valid:
         flow = InstalledAppFlow.from_client_secrets_file('settings.json', SCOPES)
         credentials = flow.run_local_server(port=0)
     
-    with open('token.pickle', 'wb') as token:
+    with open(arquivo_token, 'wb') as token:
         pickle.dump(credentials, token)
 
-# Create Drive API service
+# Criar a API do servico
 service = build('drive', 'v3', credentials=credentials)
 
 
