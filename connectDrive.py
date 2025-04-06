@@ -28,4 +28,10 @@ if not credentials or not credentials.valid:
 # Criar a API do servico
 service = build('drive', 'v3', credentials=credentials)
 
+def get_drive_service():
+    return service
+
+if __name__ == '__main__':
+    service = get_drive_service()
+
 
