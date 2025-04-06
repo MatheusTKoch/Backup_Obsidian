@@ -9,8 +9,8 @@ vault_path = os.path.join(documents_path, obsidian_folder)
 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 backup_filename = f'Obsidian_Vault_{timestamp}.zip'
-
-#Fazendo backup com data e horario
+print()
+# Fazendo backup com data e horario
 if os.path.exists(vault_path):
     backup_path = os.path.join(documents_path, backup_filename)
     
@@ -23,3 +23,9 @@ if os.path.exists(vault_path):
         print(f"Erro ao criar backup: {e}")
 else:
     print(f"Obsidian vault nao localizado em: {vault_path}")
+
+def get_arquivo():
+    return backup_filename
+
+def get_backup_path():
+    return documents_path + '\\' + backup_filename
