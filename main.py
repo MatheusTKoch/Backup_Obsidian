@@ -26,12 +26,48 @@ class ObsidianBackupTool:
         
     def setup_gui(self):
         self.root = tk.Tk()
-        self.root.title("Obsidian Backup Tool - Assistente de Configuração")
-        self.root.geometry("650x550")
-        self.root.configure(padx=20, pady=20)
+        self.root.title("Obsidian Backup Tool")
+        self.root.geometry("750x650")
+        self.root.configure(padx=20, pady=20, bg='#202020')
         
+        # Definir ícone
+        if os.path.exists('icon.ico'):
+            self.root.iconbitmap('icon.ico')
+            
+        # Estilo personalizado atualizado
+        style = ttk.Style()
+        style.theme_use('default') 
+        
+        # Configure notebook and tabs style
+        style.configure('TNotebook', 
+            background='#202020',
+            borderwidth=0)
+        style.configure('TNotebook.Tab', 
+            padding=[10, 5],
+            background='#202020',
+            foreground='#FFFFFF',
+            borderwidth=0)
+        style.map('TNotebook.Tab',
+            background=[('selected', '#483699'), ('!selected', '#202020')],
+            foreground=[('selected', '#FFFFFF'), ('!selected', '#CCCCCC')],
+            expand=[('selected', [1, 1, 1, 0])])
+        
+        # Configure other styles
+        style.configure('TFrame', background='#202020')
+        style.configure('TProgressbar',
+            troughcolor='#2D2D2D',
+            background='#483699')
+        style.configure('Vertical.TScrollbar', 
+            background='#483699', 
+            troughcolor='#2D2D2D',
+            arrowcolor='#FFFFFF')
+
         # Título
-        title = tk.Label(self.root, text="Assistente de Configuração do Obsidian Backup", font=("Arial", 16, "bold"))
+        title = tk.Label(self.root, 
+            text="Obsidian Backup Tool", 
+            font=("Arial", 16, "bold"),
+            bg='#202020',
+            fg='#FFFFFF')
         title.pack(pady=10)
         
         # Tabs
@@ -71,24 +107,47 @@ class ObsidianBackupTool:
     
     def setup_credentials_tab(self, parent):
         """Configura a aba de credenciais"""
-        instructions = tk.Label(parent, text="Este assistente vai ajudar você a configurar as credenciais do Google Drive.", 
-                             font=("Arial", 10), wraplength=550, justify="left")
+        instructions = tk.Label(parent, 
+            text="Este assistente vai ajudar você a configurar as credenciais do Google Drive.", 
+            font=("Arial", 10), 
+            wraplength=550, 
+            justify="left",
+            bg='#202020',
+            fg='#CCCCCC')
         instructions.pack(pady=10, fill="x")
         
         # Botoes
-        frame = tk.Frame(parent)
+        frame = tk.Frame(parent, bg='#202020')
         frame.pack(pady=20)
         
-        btn_create = tk.Button(frame, text="1. Abrir Console do Google Cloud", 
-                           command=self.open_google_cloud, padx=10, pady=5, width=30)
+        button_style = {
+            'bg': '#483699',
+            'fg': '#FFFFFF',
+            'activebackground': '#5B44C0',
+            'activeforeground': '#FFFFFF',
+            'relief': tk.FLAT,
+            'padx': 10,
+            'pady': 5,
+            'width': 30,
+            'cursor': 'hand2'
+        }
+        
+        btn_create = tk.Button(frame, 
+            text="1. Abrir Console do Google Cloud", 
+            command=self.open_google_cloud,
+            **button_style)
         btn_create.grid(row=0, column=0, pady=5)
         
-        btn_download = tk.Button(frame, text="2. Selecionar arquivo de credenciais", 
-                             command=self.select_credentials, padx=10, pady=5, width=30)
+        btn_download = tk.Button(frame, 
+            text="2. Selecionar arquivo de credenciais", 
+            command=self.select_credentials,
+            **button_style)
         btn_download.grid(row=1, column=0, pady=5)
         
-        btn_authorize = tk.Button(frame, text="3. Autorizar aplicativo", 
-                              command=self.authorize_app, padx=10, pady=5, width=30)
+        btn_authorize = tk.Button(frame, 
+            text="3. Autorizar aplicativo", 
+            command=self.authorize_app,
+            **button_style)
         btn_authorize.grid(row=2, column=0, pady=5)
         
         # Instrucoes detalhadas
@@ -102,20 +161,27 @@ class ObsidianBackupTool:
 2. Selecione o arquivo de credenciais que você baixou
 
 3. Autorize o aplicativo no seu navegador
-        """, justify="left", wraplength=550)
+        """, justify="left", wraplength=550, bg='#202020', fg='#CCCCCC')
         details.pack(pady=10, fill="x")
     
     def setup_schedule_tab(self, parent):
-        """Configura a aba de agendamento"""
-        instructions = tk.Label(parent, text="Configure o horário para executar o backup diariamente no Windows.", 
-                             font=("Arial", 10), wraplength=550, justify="left")
+        instructions = tk.Label(parent, 
+            text="Configure o horário para executar o backup diariamente no Windows.", 
+            font=("Arial", 10), 
+            wraplength=550, 
+            justify="left",
+            bg='#202020',
+            fg='#CCCCCC')
         instructions.pack(pady=10, fill="x")
         
         # Frame para selecao de horario
-        time_frame = tk.Frame(parent)
+        time_frame = tk.Frame(parent, bg='#202020')
         time_frame.pack(pady=20)
         
-        time_label = tk.Label(time_frame, text="Horário do backup (HH:MM):")
+        time_label = tk.Label(time_frame, 
+            text="Horário do backup (HH:MM):",
+            bg='#202020',
+            fg='#CCCCCC')
         time_label.grid(row=0, column=0, padx=5, pady=10)
         
         # Seletores de hora e minuto
@@ -128,23 +194,49 @@ class ObsidianBackupTool:
         hour_var.set("23") 
         minute_var.set("00")
         
+        # Estilo para os Comboboxes
+        style = ttk.Style()
+        style.configure('TCombobox', 
+            fieldbackground='#2D2D2D',
+            background='#483699',
+            foreground='#FFFFFF',
+            selectbackground='#483699',
+            selectforeground='#FFFFFF')
+        
         hour_dropdown = ttk.Combobox(time_frame, textvariable=hour_var, values=hour_options, width=5)
         hour_dropdown.grid(row=0, column=1, padx=5)
         
-        separator = tk.Label(time_frame, text=":")
+        separator = tk.Label(time_frame, 
+            text=":",
+            bg='#202020',
+            fg='#CCCCCC')
         separator.grid(row=0, column=2)
         
         minute_dropdown = ttk.Combobox(time_frame, textvariable=minute_var, values=minute_options, width=5)
         minute_dropdown.grid(row=0, column=3, padx=5)
         
-        schedule_btn = tk.Button(parent, text="Agendar Backup Diário", 
-                              command=lambda: self.setup_windows_task(f"{hour_var.get()}:{minute_var.get()}"),
-                              padx=10, pady=5, width=30)
+        button_style = {
+            'bg': '#483699',
+            'fg': '#FFFFFF',
+            'activebackground': '#5B44C0',
+            'activeforeground': '#FFFFFF',
+            'relief': tk.FLAT,
+            'padx': 10,
+            'pady': 5,
+            'width': 30,
+            'cursor': 'hand2'
+        }
+        
+        schedule_btn = tk.Button(parent, 
+            text="Agendar Backup Diário",
+            command=lambda: self.setup_windows_task(f"{hour_var.get()}:{minute_var.get()}"),
+            **button_style)
         schedule_btn.pack(pady=10)
         
-        check_btn = tk.Button(parent, text="Verificar Agendamentos Existentes", 
-                           command=self.check_existing_tasks,
-                           padx=10, pady=5, width=30)
+        check_btn = tk.Button(parent, 
+            text="Verificar Agendamentos Existentes",
+            command=self.check_existing_tasks,
+            **button_style)
         check_btn.pack(pady=10)
         
         details = tk.Label(parent, text="""
@@ -153,31 +245,63 @@ O Agendador de Tarefas do Windows será usado para automatizar o processo.
 
 O backup será executado mesmo que o computador esteja em uso,
 mas é necessário que o computador esteja ligado no horário agendado.
-        """, justify="left", wraplength=550)
+        """, justify="left", wraplength=550, bg='#202020', fg='#CCCCCC')
         details.pack(pady=10, fill="x")
     
     def setup_backup_tab(self, parent):
-        instructions = tk.Label(parent, text="Execute um backup manual do seu Obsidian Vault para o Google Drive.", 
-                             font=("Arial", 10), wraplength=550, justify="left")
+        parent.configure(style='Custom.TFrame')
+        
+        instructions = tk.Label(parent, 
+            text="Execute um backup manual do seu Obsidian Vault para o Google Drive.",
+            font=("Arial", 10),
+            wraplength=550,
+            justify="left",
+            bg='#202020',
+            fg='#CCCCCC')
         instructions.pack(pady=10, fill="x")
         
-        backup_btn = tk.Button(parent, text="Iniciar Backup Agora", 
-                            command=self.run_backup,
-                            padx=10, pady=5, width=30)
+        # Botão customizado
+        backup_btn = tk.Button(parent,
+            text="Iniciar Backup Agora",
+            command=self.run_backup,
+            padx=10, pady=5,
+            width=30,
+            bg='#483699',
+            fg='#FFFFFF',
+            relief=tk.FLAT,
+            activebackground='#5B44C0',
+            activeforeground='#FFFFFF',
+            cursor='hand2')
         backup_btn.pack(pady=20)
         
-        self.progress = ttk.Progressbar(parent, orient="horizontal", length=500, mode="determinate")
+        # Progress bar
+        self.progress = ttk.Progressbar(parent,
+            orient="horizontal",
+            length=500,
+            mode="determinate")
         self.progress.pack(pady=10)
         
-        log_frame = tk.Frame(parent)
+        # Log frame
+        log_frame = tk.Frame(parent, bg='#202020')
         log_frame.pack(pady=10, fill="both", expand=True)
         
-        log_label = tk.Label(log_frame, text="Log de operações:")
+        log_label = tk.Label(log_frame,
+            text="Log de operações:",
+            bg='#202020',
+            fg='#CCCCCC')
         log_label.pack(anchor="w")
         
-        self.log_text = tk.Text(log_frame, height=10, width=60)
+        self.log_text = tk.Text(log_frame,
+            height=10,
+            width=60,
+            bg='#2D2D2D',
+            fg='#CCCCCC',
+            insertbackground='#FFFFFF',
+            relief=tk.FLAT)
         self.log_text.pack(fill="both", expand=True)
-        scrollbar = ttk.Scrollbar(self.log_text, command=self.log_text.yview)
+        
+        scrollbar = ttk.Scrollbar(self.log_text,
+            command=self.log_text.yview)
         scrollbar.pack(side="right", fill="y")
         self.log_text.config(yscrollcommand=scrollbar.set)
         
