@@ -26,7 +26,7 @@ class ObsidianBackupTool:
         
     def setup_gui(self):
         self.root = tk.Tk()
-        self.root.title("Obsidian Backup - Assistente de Configuração")
+        self.root.title("Obsidian Backup Tool - Assistente de Configuração")
         self.root.geometry("650x550")
         self.root.configure(padx=20, pady=20)
         
