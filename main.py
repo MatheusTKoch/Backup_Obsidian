@@ -395,12 +395,14 @@ mas é necessário que o computador esteja ligado no horário agendado.
             
         task_name = "ObsidianVaultBackup"
         
+        working_dir = os.path.dirname(os.path.abspath(__file__)) if not getattr(sys, 'frozen', False) else os.path.dirname(sys.executable)
+        
         # Comando para criar a tarefa
         try:
             if getattr(sys, 'frozen', False):
                 cmd = [
                     'schtasks', '/create', '/tn', task_name, 
-                    '/tr', f'"{exe_path}" --run',
+                    '/tr', f'cmd /c cd /d "{working_dir}" && "{exe_path}" --run',
                     '/sc', 'daily', 
                     '/st', run_time,
                     '/f'
@@ -408,7 +410,7 @@ mas é necessário que o computador esteja ligado no horário agendado.
             else:
                 cmd = [
                     'schtasks', '/create', '/tn', task_name, 
-                    '/tr', f'"{exe_path}" "{script_path}" --run',
+                    '/tr', f'cmd /c cd /d "{working_dir}" && "{exe_path}" "{script_path}" --run',
                     '/sc', 'daily', 
                     '/st', run_time,
                     '/f'
@@ -582,8 +584,68 @@ def run_headless_backup():
     print("Executando backup do Obsidian Vault...")
 
     try:
+        from fileZip import get_arquivo, get_backup_path
+        from connectDrive import get_drive_service
+        from googleapiclient.http import MediaFileUpload
+        import shutil
+        import os
+        
+        # Verificar e criar backup
+        documents_path = os.path.expanduser("~\\Documents")
+        obsidian_folder = "Obsidian Vault"
+        vault_path = os.path.join(documents_path, obsidian_folder)
+        
+        if not os.path.exists(vault_path):
+            print(f"Erro: Vault do Obsidian não encontrado em: {vault_path}")
+            sys.exit(1)
+            
+        backup_filename = get_arquivo()
+        backup_path = get_backup_path()
+        
+        print(f"Criando arquivo ZIP: {backup_filename}")
+        shutil.make_archive(
+            os.path.splitext(backup_path)[0], 'zip', vault_path
+        )
+        
+        service = get_drive_service()
+        
+        print("Verificando backups anteriores...")
+        prefixo = "Obsidian_Vault"
+        pesquisa = f"name contains '{prefixo}' and trashed = false"
+        
+        results = service.files().list(
+            q=pesquisa,
+            spaces='drive',
+            fields='files(id, name)'
+        ).execute()
+        
+        arquivos_encontrados = results.get('files', [])
+        
+        if arquivos_encontrados:
+            print(f"Removendo {len(arquivos_encontrados)} backups anteriores...")
+            for arquivo in arquivos_encontrados:
+                service.files().delete(fileId=arquivo['id']).execute()
+        
+        print("Iniciando upload para o Google Drive...")
+        arquivo_metada = {'name': backup_filename}
+        media = MediaFileUpload(backup_path, resumable=True)
+        
+        file = service.files().create(
+            body=arquivo_metada,
+            media_body=media,
+            fields='id,name'
+        ).execute()
+        
+        print(f"Upload concluído! ID do arquivo: {file.get('id')}")
+        
+        try:
+            os.remove(backup_path)
+            print("Arquivo ZIP local removido")
+        except Exception as e:
+            print(f"Aviso: Não foi possível remover o arquivo ZIP local: {e}")
         
         print("Backup concluído com sucesso!")
+        
     except Exception as e:
         print(f"Erro durante o backup: {e}")
         sys.exit(1)
