@@ -553,19 +553,34 @@ mas é necessário que o computador esteja ligado no horário agendado.
             self.progress["value"] = 100
             self.status_var.set("Backup concluído com sucesso!")
             
-            import time
-            time.sleep(2)
+            media._fd.close()
             
-            try:
-                os.remove(backup_path)
-                self.log("Arquivo ZIP local removido")
-            except PermissionError:
-                self.log("Aviso: Não foi possível remover o arquivo ZIP local automaticamente")
+            import time
+            time.sleep(3)
+            
+            max_attempts = 3
+            attempt = 0
+            
+            while attempt < max_attempts:
                 try:
-                    win32file.DeleteFile(backup_path)
-                    self.log("Arquivo ZIP local removido (usando win32file)")
+                    if os.path.exists(backup_path):
+                        import gc
+                        gc.collect()
+                        os.chmod(backup_path, 0o777) 
+                        os.unlink(backup_path)
+                        self.log("Arquivo ZIP local removido")
+                        break
+                except PermissionError:
+                    attempt += 1
+                    self.log(f"Tentativa {attempt} de remover arquivo falhou, aguardando...")
+                    time.sleep(2) 
                 except Exception as e:
-                    self.log(f"Aviso: O arquivo ZIP local precisará ser removido manualmente: {e}")
+                    self.log(f"Erro ao remover arquivo: {e}")
+                    break
+            
+            if attempt == max_attempts:
+                self.log("Não foi possível remover o arquivo ZIP automaticamente.")
+                self.log(f"Por favor, remova manualmente: {backup_path}")
             
             messagebox.showinfo("Backup Concluído", "Backup do Obsidian Vault realizado com sucesso!")
             
