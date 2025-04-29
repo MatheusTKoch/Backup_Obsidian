@@ -451,7 +451,7 @@ mas é necessário que o computador esteja ligado no horário agendado.
             messagebox.showerror("Erro", "Credenciais não configuradas completamente. Complete a configuração primeiro.")
             return
             
-        # Iniciar backup em uma thread separada para não congelar a interface
+        # Iniciar backup em uma thread separada
         self.progress["value"] = 0
         self.log_text.delete(1.0, tk.END)
         self.status_var.set("Executando backup...")

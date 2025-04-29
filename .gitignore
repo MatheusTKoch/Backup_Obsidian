@@ -1,3 +1,10 @@
 settings.json
 token.pickle
 __pycache__
+build
+Obsidian_Backup_Tool_x64.spec
+Obsidian_Backup_Tool_x86.spec
+ObsidianBackupTool.spec
+release
+inno_setup_x64.iss
+inno_setup_x86.iss
