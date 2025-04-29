@@ -76,7 +76,7 @@ inno_script_64:
 	@echo '#define MyAppExeName "$(EXE_64)"' >> inno_setup_x64.iss
 	@echo '' >> inno_setup_x64.iss
 	@echo '[Setup]' >> inno_setup_x64.iss
-	@echo 'AppId={YOUR-UNIQUE-APP-ID-HERE}' >> inno_setup_x64.iss
+	@echo 'AppId={{YOUR-UNIQUE-APP-ID-HERE}' >> inno_setup_x64.iss
 	@echo 'AppName={#MyAppName}' >> inno_setup_x64.iss
 	@echo 'AppVersion={#MyAppVersion}' >> inno_setup_x64.iss
 	@echo 'AppPublisher={#MyAppPublisher}' >> inno_setup_x64.iss
@@ -108,7 +108,7 @@ inno_script_64:
 	@echo 'Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon' >> inno_setup_x64.iss
 	@echo '' >> inno_setup_x64.iss
 	@echo '[Run]' >> inno_setup_x64.iss
-	@echo 'Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, ''&'', ''&&'')}}"; Flags: nowait postinstall skipifsilent' >> inno_setup_x64.iss
+	@echo 'Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent' >> inno_setup_x64.iss
 
 # Generate Inno Setup script for 32-bit
 .PHONY: inno_script_32
@@ -121,7 +121,7 @@ inno_script_32:
 	@echo '#define MyAppExeName "$(EXE_32)"' >> inno_setup_x86.iss
 	@echo '' >> inno_setup_x86.iss
 	@echo '[Setup]' >> inno_setup_x86.iss
-	@echo 'AppId={YOUR-UNIQUE-APP-ID-HERE-32BIT}' >> inno_setup_x86.iss
+	@echo 'AppId={{YOUR-UNIQUE-APP-ID-HERE-32BIT}' >> inno_setup_x86.iss
 	@echo 'AppName={#MyAppName}' >> inno_setup_x86.iss
 	@echo 'AppVersion={#MyAppVersion}' >> inno_setup_x86.iss
 	@echo 'AppPublisher={#MyAppPublisher}' >> inno_setup_x86.iss
@@ -152,7 +152,7 @@ inno_script_32:
 	@echo 'Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon' >> inno_setup_x86.iss
 	@echo '' >> inno_setup_x86.iss
 	@echo '[Run]' >> inno_setup_x86.iss
-	@echo 'Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, ''&'', ''&&'')}}"; Flags: nowait postinstall skipifsilent' >> inno_setup_x86.iss
+	@echo 'Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent' >> inno_setup_x86.iss
 
 # Build Inno Setup installers
 .PHONY: build_installer_64
@@ -170,9 +170,3 @@ build_installer_32: inno_script_32
 # Build both installers
 .PHONY: installers
 installers: build_installer_64 build_installer_32
-
-# Create GitHub release script
-.PHONY: create_release_script
-create_release_script:
-	@echo "Executing GitHub release script..."
-	@$(PYTHON) 
