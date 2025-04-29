@@ -34,7 +34,7 @@ GITHUB_RELEASE_BODY = "Release of $(APP_NAME) version $(VERSION) for both 32-bit
 
 # Default target
 .PHONY: all
-all: setup build_all installers
+all: clean setup build_all installers
 
 # Create output directories
 .PHONY: setup
@@ -49,16 +49,20 @@ setup:
 .PHONY: build_64
 build_64:
 	@echo "Building 64-bit executable..."
-	@$(PYTHON_64) -m PyInstaller --onefile --clean --name $(EXE_64:%.exe=%) \
-		--distpath $(DIST_64) --workpath $(BUILD_DIR)/x64 $(MAIN_SCRIPT)
+	pyinstaller obsidian_backup.spec \
+		--distpath $(DIST_64) \
+		--workpath $(BUILD_DIR)/x64 \
+		--clean
 	@echo "64-bit executable built successfully."
 
 # Build 32-bit executable
 .PHONY: build_32
 build_32:
 	@echo "Building 32-bit executable..."
-	@$(PYTHON_32) -m PyInstaller --onefile --clean --name $(EXE_32:%.exe=%) \
-		--distpath $(DIST_32) --workpath $(BUILD_DIR)/x32 $(MAIN_SCRIPT)
+	pyinstaller obsidian_backup.spec \
+		--distpath $(DIST_32) \
+		--workpath $(BUILD_DIR)/x32 \
+		--clean
 	@echo "32-bit executable built successfully."
 
 # Build both executables
@@ -91,6 +95,7 @@ inno_script_64:
 	@echo 'SolidCompression=yes' >> inno_setup_x64.iss
 	@echo 'ArchitecturesInstallIn64BitMode=x64' >> inno_setup_x64.iss
 	@echo 'ArchitecturesAllowed=x64' >> inno_setup_x64.iss
+	@echo 'SetupIconFile=icon.ico' >> inno_setup_x64.iss
 	@echo '' >> inno_setup_x64.iss
 	@echo '[Languages]' >> inno_setup_x64.iss
 	@echo 'Name: "english"; MessagesFile: "compiler:Default.isl"' >> inno_setup_x64.iss
@@ -135,6 +140,7 @@ inno_script_32:
 	@echo 'Compression=lzma' >> inno_setup_x86.iss
 	@echo 'SolidCompression=yes' >> inno_setup_x86.iss
 	@echo 'ArchitecturesAllowed=x86 x64' >> inno_setup_x86.iss
+	@echo 'SetupIconFile=icon.ico' >> inno_setup_x86.iss
 	@echo '' >> inno_setup_x86.iss
 	@echo '[Languages]' >> inno_setup_x86.iss
 	@echo 'Name: "english"; MessagesFile: "compiler:Default.isl"' >> inno_setup_x86.iss
@@ -154,17 +160,49 @@ inno_script_32:
 	@echo '[Run]' >> inno_setup_x86.iss
 	@echo 'Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent' >> inno_setup_x86.iss
 
-# Build Inno Setup installers
+# Clean build files with improved error handling
+.PHONY: clean
+clean:
+    @echo "Cleaning build files..."
+    @if exist "$(BUILD_DIR)" ( \
+        taskkill /F /IM "$(EXE_64)" 2>nul || echo "No running executables found" && \
+        timeout /t 2 /nobreak >nul && \
+        rd /s /q "$(BUILD_DIR)" 2>nul || echo "Cannot delete build directory" \
+    )
+    @if exist "$(DIST_DIR)" ( \
+        rd /s /q "$(DIST_DIR)" 2>nul || echo "Cannot delete dist directory" \
+    )
+    @if exist "*_x64.exe.spec" ( \
+        del /f *_x64.exe.spec 2>nul || echo "Cannot delete x64 spec files" \
+    )
+    @if exist "*_x86.exe.spec" ( \
+        del /f *_x86.exe.spec 2>nul || echo "Cannot delete x86 spec files" \
+    )
+    @if exist "inno_setup_x64.iss" ( \
+        del /f inno_setup_x64.iss 2>nul || echo "Cannot delete x64 ISS file" \
+    )
+    @if exist "inno_setup_x86.iss" ( \
+        del /f inno_setup_x86.iss 2>nul || echo "Cannot delete x86 ISS file" \
+    )
+    @echo "Clean completed"
+
+# Build Inno Setup installers with improved error handling
 .PHONY: build_installer_64
-build_installer_64: inno_script_64
+build_installer_64: build_64 inno_script_64
 	@echo "Building 64-bit installer..."
-	@$(INNO_SETUP) "inno_setup_x64.iss"
+	@if not exist "$(DIST_64)\$(EXE_64)" ( \
+		echo "Error: 64-bit executable not found" && exit 1 \
+	)
+	@"$(INNO_SETUP)" "inno_setup_x64.iss" || (echo "Error building 64-bit installer" && exit 1)
 	@echo "64-bit installer built successfully."
 
 .PHONY: build_installer_32
-build_installer_32: inno_script_32
+build_installer_32: build_32 inno_script_32
 	@echo "Building 32-bit installer..."
-	@$(INNO_SETUP) "inno_setup_x86.iss"
+	@if not exist "$(DIST_32)\$(EXE_32)" ( \
+		echo "Error: 32-bit executable not found" && exit 1 \
+	)
+	@"$(INNO_SETUP)" "inno_setup_x86.iss" || (echo "Error building 32-bit installer" && exit 1)
 	@echo "32-bit installer built successfully."
 
 # Build both installers

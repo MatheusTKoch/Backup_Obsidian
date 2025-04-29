@@ -2,8 +2,8 @@ settings.json
 token.pickle
 __pycache__
 build
-Obsidian_Backup_Tool_x64.spec
-Obsidian_Backup_Tool_x86.spec
+Obsidian_Backup_Tool_x64.exe.spec
+Obsidian_Backup_Tool_x86.exe.spec
 ObsidianBackupTool.spec
 release
 inno_setup_x64.iss
