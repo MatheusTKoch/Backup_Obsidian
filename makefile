@@ -10,8 +10,8 @@ PYTHON_64 = C:\Users\Matheus\AppData\Local\Programs\Python\Python312\python.exe
 PYTHON_32 = C:\Users\Matheus\AppData\Local\Programs\Python\Python312\python.exe
 PYTHON = python
 
-# Inno Setup Compiler path
-INNO_SETUP = "C:/Program Files (x86)/Inno Setup 6/ISCC.exe"
+# Inno Setup Compiler path - fix path handling
+INNO_SETUP = C:\PROGRA~2\INNOSE~1\ISCC.exe
 
 # Build directories
 BUILD_DIR = build
@@ -34,7 +34,7 @@ GITHUB_RELEASE_BODY = "Release of $(APP_NAME) version $(VERSION) for both 32-bit
 
 # Default target
 .PHONY: all
-all: clean setup build_all installers
+all: clean setup installers
 
 # Create output directories
 .PHONY: setup
@@ -65,9 +65,6 @@ build_32:
 		--clean
 	@echo "32-bit executable built successfully."
 
-# Build both executables
-.PHONY: build_all
-build_all: build_64 build_32
 
 # Generate Inno Setup script for 64-bit
 .PHONY: inno_script_64
@@ -189,21 +186,25 @@ clean:
 # Build Inno Setup installers with improved error handling
 .PHONY: build_installer_64
 build_installer_64: build_64 inno_script_64
-	@echo "Building 64-bit installer..."
-	@if not exist "$(DIST_64)\$(EXE_64)" ( \
-		echo "Error: 64-bit executable not found" && exit 1 \
-	)
-	@"$(INNO_SETUP)" "inno_setup_x64.iss" || (echo "Error building 64-bit installer" && exit 1)
-	@echo "64-bit installer built successfully."
+    @echo "Building 64-bit installer..."
+    @if not exist "dist\x64\ObsidianBackup.exe" ( \
+        echo "Error: 64-bit executable not found" & exit /b 1 \
+    )
+    @"$(INNO_SETUP)" inno_setup_x64.iss /Q || ( \
+        echo "Error building 64-bit installer" & exit /b 1 \
+    )
+    @echo "64-bit installer built successfully."
 
 .PHONY: build_installer_32
 build_installer_32: build_32 inno_script_32
-	@echo "Building 32-bit installer..."
-	@if not exist "$(DIST_32)\$(EXE_32)" ( \
-		echo "Error: 32-bit executable not found" && exit 1 \
-	)
-	@"$(INNO_SETUP)" "inno_setup_x86.iss" || (echo "Error building 32-bit installer" && exit 1)
-	@echo "32-bit installer built successfully."
+    @echo "Building 32-bit installer..."
+    @if not exist "dist\x86\ObsidianBackup.exe" ( \
+        echo "Error: 32-bit executable not found" & exit /b 1 \
+    )
+    @"$(INNO_SETUP)" inno_setup_x86.iss /Q || ( \
+        echo "Error building 32-bit installer" & exit /b 1 \
+    )
+    @echo "32-bit installer built successfully."
 
 # Build both installers
 .PHONY: installers
