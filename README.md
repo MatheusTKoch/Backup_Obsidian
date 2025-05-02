@@ -9,7 +9,6 @@ Uma ferramenta simples para fazer backup automático do seu Obsidian Vault para 
 - Agendamento de backups diários
 - Upload automático para o Google Drive
 - Gerenciamento de versões anteriores
-- Suporte para sistemas 32-bit e 64-bit
 
 ## Pré-requisitos
 
@@ -18,46 +17,61 @@ Uma ferramenta simples para fazer backup automático do seu Obsidian Vault para 
 pip install google-auth-oauthlib google-api-python-client pywin32 pyinstaller requests
 ```
 
-### Ferramentas de Build
-- Python 3.x (32-bit e 64-bit se necessário)
-- Inno Setup 6 ou superior
-- Make para Windows (GNU Make)
+## Configuração Inicial
 
-## Build e Instalação
+### 1. Configuração do Google Cloud
 
-1. Clone o repositório:
+1. Acesse o [Google Cloud Console](https://console.cloud.google.com)
+2. Crie um novo projeto:
+   - Clique no seletor de projetos no topo
+   - Clique em "Novo Projeto"
+   - Dê um nome ao projeto (ex: "Obsidian Backup")
+   - Clique em "Criar"
+
+3. Configure a API do Google Drive:
+   - No menu lateral, vá para "APIs e Serviços" > "Biblioteca"
+   - Pesquise por "Google Drive API"
+   - Clique em "Ativar"
+
+4. Configure as credenciais OAuth:
+   - No menu lateral, vá para "APIs e Serviços" > "Credenciais"
+   - Clique em "Criar Credenciais" > "ID do Cliente OAuth"
+   - Em "Tipo de aplicativo" selecione "Aplicativo para Desktop"
+   - Dê um nome à sua aplicação
+   - Clique em "Criar"
+   - Faça o download do arquivo JSON de credenciais
+
+### 2. Configuração do Aplicativo
+
+1. Execute o programa pela opção manual pela linha de comando:
 ```bash
-git clone https://github.com/MatheusTKoch/Backup_Obsidian.git
-cd Backup_Obsidian
+python main.py
 ```
+Ou executando o arquivo exe através dos releases.
 
-2. Configure os caminhos no Makefile:
-   - Ajuste `PYTHON_64` e `PYTHON_32` para seus caminhos do Python
-   - Verifique se `INNO_SETUP` aponta para sua instalação do Inno Setup
+2. Na aba "Configurar Credenciais":
+   - Clique em "Abrir console do Google Cloud"
+   - Crie um novo projeto e autorize o Google Drive criando credenciais para o cliente Auth 2.0
+   - Clique em "Selecionar arquivo de credenciais"
+   - Escolha o arquivo JSON baixado do Google Cloud
+   - Clique em "Autorizar aplicativo"
+   - Faça login com sua conta Google quando solicitado
+   - Autorize o acesso ao Google Drive
 
-3. Execute o build completo:
-```bash
-make all
-```
+### 3. Configuração do Backup
 
-Este comando irá:
-- Criar diretórios de build
-- Compilar executáveis 32-bit e 64-bit
-- Gerar instaladores para ambas as arquiteturas
-- Os instaladores finais estarão na pasta `release/`
+#### Backup Manual
+1. Na aba "Backup Manual":
+   - Clique em "Iniciar Backup Agora"
+   - Acompanhe o progresso na barra de status
+   - Verifique o log para detalhes da operação
 
-## Configuração
-
-1. Execute o programa e siga os passos na aba "Configurar Credenciais":
-   - Crie um projeto no Google Cloud Console
-   - Ative a API do Google Drive
-   - Configure as credenciais OAuth 2.0
-   - Baixe e selecione o arquivo de credenciais
-   - Autorize o aplicativo
-
-2. Opções de uso:
-   - **Backup Manual**: Use a aba "Backup Manual" para fazer backups imediatos
-   - **Agendamento**: Configure backups automáticos na aba "Agendar Backup"
+#### Backup Agendado
+1. Na aba "Agendar Backup":
+   - Selecione o horário desejado
+   - Clique em "Agendar Backup Diário"
+   - O backup será executado automaticamente no horário definido
+   - Use "Verificar Agendamentos Existentes" para conferir a configuração
 
 ## Uso via Linha de Comando
 
@@ -71,20 +85,15 @@ python main.py --run
 - `main.py`: Interface gráfica e lógica principal
 - `fileZip.py`: Gerenciamento de arquivos ZIP
 - `connectDrive.py`: Conexão com Google Drive
-- `makefile`: Automação de build e instaladores
+- `sendToDrive.py`: Envio de arquivos ao Google Drive
 - `settings.json`: Configurações do Google Cloud (gerado na configuração)
 - `token.pickle`: Token de autenticação (gerado na configuração)
-
-## Instaladores
-
-Os instaladores são gerados em:
-- 64-bit: `release/Obsidian_Backup_Tool_x64_Setup.exe`
-- 32-bit: `release/Obsidian_Backup_Tool_x86_Setup.exe`
 
 ## Localização Padrão
 
 O programa procura pela pasta "Obsidian Vault" em:
-```
+
+```bash
 C:\Users\<SEU_USUARIO>\Documents\Obsidian Vault
 ```
 
@@ -93,5 +102,5 @@ C:\Users\<SEU_USUARIO>\Documents\Obsidian Vault
 - O backup é compactado em ZIP antes do upload
 - Backups anteriores são automaticamente removidos do Drive
 - Uma cópia local temporária é criada e removida após o upload
-- Os instaladores incluem todas as dependências necessárias
-- Suporte para Windows 7 ou superior (32-bit e 64-bit)
+- O aplicativo mantém apenas a versão mais recente no Drive
+- Necessário manter os arquivos `settings.json` e `token.pickle` para autenticação

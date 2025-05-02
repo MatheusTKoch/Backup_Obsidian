@@ -11,7 +11,7 @@ PYTHON_32 = C:\Users\Matheus\AppData\Local\Programs\Python\Python312\python.exe
 PYTHON = python
 
 # Inno Setup Compiler path - fix path handling
-INNO_SETUP = C:\PROGRA~2\INNOSE~1\ISCC.exe
+INNO_SETUP = C:\Program Files (x86)\Inno Setup 6\ISCC.exe
 
 # Build directories
 BUILD_DIR = build
@@ -190,7 +190,7 @@ build_installer_64: build_64 inno_script_64
     @if not exist "dist\x64\ObsidianBackup.exe" ( \
         echo "Error: 64-bit executable not found" & exit /b 1 \
     )
-    @"$(INNO_SETUP)" inno_setup_x64.iss /Q || ( \
+    @"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" inno_setup_x64.iss || ( \
         echo "Error building 64-bit installer" & exit /b 1 \
     )
     @echo "64-bit installer built successfully."
