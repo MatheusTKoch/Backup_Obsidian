@@ -1,211 +1,78 @@
-# Makefile for building PyInstaller executables, Inno Setup installers, and GitHub releases
+# Makefile para Obsidian Backup Tool
 
-# Application details
 APP_NAME = Obsidian_Backup_Tool
-VERSION = 1.0.0
-MAIN_SCRIPT = main.py
-
-# Python paths (update these paths to match your system)
-PYTHON_64 = C:\Users\Matheus\AppData\Local\Programs\Python\Python312\python.exe
-PYTHON_32 = C:\Users\Matheus\AppData\Local\Programs\Python\Python312\python.exe
-PYTHON = python
-
-# Inno Setup Compiler path - fix path handling
-INNO_SETUP = C:\Program Files (x86)\Inno Setup 6\ISCC.exe
-
-# Build directories
+VERSION = 1.0.1
+PYTHON = C:/Python313/python.exe
 BUILD_DIR = build
 DIST_DIR = dist
-DIST_64 = $(DIST_DIR)/x64
-DIST_32 = $(DIST_DIR)/x86
 RELEASE_DIR = release
+EXE_64 = ObsidianBackup_x64.exe
+EXE_32 = ObsidianBackup_x86.exe
 
-# Output names
-EXE_64 = $(APP_NAME)_x64.exe
-EXE_32 = $(APP_NAME)_x86.exe
-SETUP_64 = $(APP_NAME)_x64_Setup.exe
-SETUP_32 = $(APP_NAME)_x86_Setup.exe
+.PHONY: all quick clean setup install_deps build build_64 build_32 release test help
 
-# GitHub release settings
-GITHUB_REPO = MatheusTKoch/Backup_Obsidian
-GITHUB_TAG = v$(VERSION)
-GITHUB_RELEASE_NAME = $(APP_NAME) $(VERSION)
-GITHUB_RELEASE_BODY = "Release of $(APP_NAME) version $(VERSION) for both 32-bit and 64-bit systems."
+# Build completo
+all: clean setup build release
 
-# Default target
-.PHONY: all
-all: clean setup installers
+# Build rápido usando script Python
+quick: clean install_deps
+	@echo Construindo executáveis...
+	@$(PYTHON) build.py
 
-# Create output directories
-.PHONY: setup
+# Criar diretórios
 setup:
-	@echo "Creating output directories..."
-	@mkdir -p $(BUILD_DIR)
-	@mkdir -p $(DIST_64)
-	@mkdir -p $(DIST_32)
-	@mkdir -p $(RELEASE_DIR)
+	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)" >nul 2>&1
+	@if not exist "$(DIST_DIR)" mkdir "$(DIST_DIR)" >nul 2>&1
+	@if not exist "$(RELEASE_DIR)" mkdir "$(RELEASE_DIR)" >nul 2>&1
 
-# Build 64-bit executable
-.PHONY: build_64
+# Instalar dependências
+install_deps:
+	@echo Instalando dependências...
+	@$(PYTHON) -m pip install -r requirements.txt >nul
+
+# Build manual (ambos)
+build: build_64 build_32
+
+# Build 64-bit
 build_64:
-	@echo "Building 64-bit executable..."
-	pyinstaller obsidian_backup.spec \
-		--distpath $(DIST_64) \
-		--workpath $(BUILD_DIR)/x64 \
-		--clean
-	@echo "64-bit executable built successfully."
+	@echo Construindo executável 64-bit...
+	@$(PYTHON) -m PyInstaller obsidian_backup_x64.spec --clean >nul
+	@if exist "dist\$(EXE_64)" (echo ✓ 64-bit concluído) else (echo ❌ Falha 64-bit)
 
-# Build 32-bit executable
-.PHONY: build_32
+# Build 32-bit
 build_32:
-	@echo "Building 32-bit executable..."
-	pyinstaller obsidian_backup.spec \
-		--distpath $(DIST_32) \
-		--workpath $(BUILD_DIR)/x32 \
-		--clean
-	@echo "32-bit executable built successfully."
+	@echo Construindo executável 32-bit...
+	@$(PYTHON) -m PyInstaller obsidian_backup_x86.spec --clean >nul
+	@if exist "dist\$(EXE_32)" (echo ✓ 32-bit concluído) else (echo ❌ Falha 32-bit)
 
+# Criar pacote de release
+release:
+	@echo Criando pacote de release...
+	@$(PYTHON) release.py --create-zip >nul
+	@$(PYTHON) prepare_release.py >nul
+	@echo ✓ Release preparado
 
-# Generate Inno Setup script for 64-bit
-.PHONY: inno_script_64
-inno_script_64:
-	@echo "Generating 64-bit Inno Setup script..."
-	@echo '#define MyAppName "$(APP_NAME)"' > inno_setup_x64.iss
-	@echo '#define MyAppVersion "$(VERSION)"' >> inno_setup_x64.iss
-	@echo '#define MyAppPublisher "Your Name or Company"' >> inno_setup_x64.iss
-	@echo '#define MyAppURL "https://github.com/$(GITHUB_REPO)"' >> inno_setup_x64.iss
-	@echo '#define MyAppExeName "$(EXE_64)"' >> inno_setup_x64.iss
-	@echo '' >> inno_setup_x64.iss
-	@echo '[Setup]' >> inno_setup_x64.iss
-	@echo 'AppId={{YOUR-UNIQUE-APP-ID-HERE}' >> inno_setup_x64.iss
-	@echo 'AppName={#MyAppName}' >> inno_setup_x64.iss
-	@echo 'AppVersion={#MyAppVersion}' >> inno_setup_x64.iss
-	@echo 'AppPublisher={#MyAppPublisher}' >> inno_setup_x64.iss
-	@echo 'AppPublisherURL={#MyAppURL}' >> inno_setup_x64.iss
-	@echo 'AppSupportURL={#MyAppURL}' >> inno_setup_x64.iss
-	@echo 'AppUpdatesURL={#MyAppURL}' >> inno_setup_x64.iss
-	@echo 'DefaultDirName={autopf}\{#MyAppName}' >> inno_setup_x64.iss
-	@echo 'DefaultGroupName={#MyAppName}' >> inno_setup_x64.iss
-	@echo 'OutputBaseFilename=$(SETUP_64:%.exe=%)' >> inno_setup_x64.iss
-	@echo 'OutputDir=$(RELEASE_DIR)' >> inno_setup_x64.iss
-	@echo 'Compression=lzma' >> inno_setup_x64.iss
-	@echo 'SolidCompression=yes' >> inno_setup_x64.iss
-	@echo 'ArchitecturesInstallIn64BitMode=x64' >> inno_setup_x64.iss
-	@echo 'ArchitecturesAllowed=x64' >> inno_setup_x64.iss
-	@echo 'SetupIconFile=icon.ico' >> inno_setup_x64.iss
-	@echo '' >> inno_setup_x64.iss
-	@echo '[Languages]' >> inno_setup_x64.iss
-	@echo 'Name: "english"; MessagesFile: "compiler:Default.isl"' >> inno_setup_x64.iss
-	@echo '' >> inno_setup_x64.iss
-	@echo '[Tasks]' >> inno_setup_x64.iss
-	@echo 'Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked' >> inno_setup_x64.iss
-	@echo '' >> inno_setup_x64.iss
-	@echo '[Files]' >> inno_setup_x64.iss
-	@echo 'Source: "$(DIST_64)\$(EXE_64)"; DestDir: "{app}"; Flags: ignoreversion' >> inno_setup_x64.iss
-	@echo '; Add any additional files needed by your application' >> inno_setup_x64.iss
-	@echo '' >> inno_setup_x64.iss
-	@echo '[Icons]' >> inno_setup_x64.iss
-	@echo 'Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"' >> inno_setup_x64.iss
-	@echo 'Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"' >> inno_setup_x64.iss
-	@echo 'Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon' >> inno_setup_x64.iss
-	@echo '' >> inno_setup_x64.iss
-	@echo '[Run]' >> inno_setup_x64.iss
-	@echo 'Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent' >> inno_setup_x64.iss
-
-# Generate Inno Setup script for 32-bit
-.PHONY: inno_script_32
-inno_script_32:
-	@echo "Generating 32-bit Inno Setup script..."
-	@echo '#define MyAppName "$(APP_NAME)"' > inno_setup_x86.iss
-	@echo '#define MyAppVersion "$(VERSION)"' >> inno_setup_x86.iss
-	@echo '#define MyAppPublisher "Your Name or Company"' >> inno_setup_x86.iss
-	@echo '#define MyAppURL "https://github.com/$(GITHUB_REPO)"' >> inno_setup_x86.iss
-	@echo '#define MyAppExeName "$(EXE_32)"' >> inno_setup_x86.iss
-	@echo '' >> inno_setup_x86.iss
-	@echo '[Setup]' >> inno_setup_x86.iss
-	@echo 'AppId={{YOUR-UNIQUE-APP-ID-HERE-32BIT}' >> inno_setup_x86.iss
-	@echo 'AppName={#MyAppName}' >> inno_setup_x86.iss
-	@echo 'AppVersion={#MyAppVersion}' >> inno_setup_x86.iss
-	@echo 'AppPublisher={#MyAppPublisher}' >> inno_setup_x86.iss
-	@echo 'AppPublisherURL={#MyAppURL}' >> inno_setup_x86.iss
-	@echo 'AppSupportURL={#MyAppURL}' >> inno_setup_x86.iss
-	@echo 'AppUpdatesURL={#MyAppURL}' >> inno_setup_x86.iss
-	@echo 'DefaultDirName={autopf}\{#MyAppName}' >> inno_setup_x86.iss
-	@echo 'DefaultGroupName={#MyAppName}' >> inno_setup_x86.iss
-	@echo 'OutputBaseFilename=$(SETUP_32:%.exe=%)' >> inno_setup_x86.iss
-	@echo 'OutputDir=$(RELEASE_DIR)' >> inno_setup_x86.iss
-	@echo 'Compression=lzma' >> inno_setup_x86.iss
-	@echo 'SolidCompression=yes' >> inno_setup_x86.iss
-	@echo 'ArchitecturesAllowed=x86 x64' >> inno_setup_x86.iss
-	@echo 'SetupIconFile=icon.ico' >> inno_setup_x86.iss
-	@echo '' >> inno_setup_x86.iss
-	@echo '[Languages]' >> inno_setup_x86.iss
-	@echo 'Name: "english"; MessagesFile: "compiler:Default.isl"' >> inno_setup_x86.iss
-	@echo '' >> inno_setup_x86.iss
-	@echo '[Tasks]' >> inno_setup_x86.iss
-	@echo 'Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked' >> inno_setup_x86.iss
-	@echo '' >> inno_setup_x86.iss
-	@echo '[Files]' >> inno_setup_x86.iss
-	@echo 'Source: "$(DIST_32)\$(EXE_32)"; DestDir: "{app}"; Flags: ignoreversion' >> inno_setup_x86.iss
-	@echo '; Add any additional files needed by your application' >> inno_setup_x86.iss
-	@echo '' >> inno_setup_x86.iss
-	@echo '[Icons]' >> inno_setup_x86.iss
-	@echo 'Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"' >> inno_setup_x86.iss
-	@echo 'Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"' >> inno_setup_x86.iss
-	@echo 'Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon' >> inno_setup_x86.iss
-	@echo '' >> inno_setup_x86.iss
-	@echo '[Run]' >> inno_setup_x86.iss
-	@echo 'Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent' >> inno_setup_x86.iss
-
-# Clean build files with improved error handling
-.PHONY: clean
+# Limpar arquivos
 clean:
-    @echo "Cleaning build files..."
-    @if exist "$(BUILD_DIR)" ( \
-        taskkill /F /IM "$(EXE_64)" 2>nul || echo "No running executables found" && \
-        timeout /t 2 /nobreak >nul && \
-        rd /s /q "$(BUILD_DIR)" 2>nul || echo "Cannot delete build directory" \
-    )
-    @if exist "$(DIST_DIR)" ( \
-        rd /s /q "$(DIST_DIR)" 2>nul || echo "Cannot delete dist directory" \
-    )
-    @if exist "*_x64.exe.spec" ( \
-        del /f *_x64.exe.spec 2>nul || echo "Cannot delete x64 spec files" \
-    )
-    @if exist "*_x86.exe.spec" ( \
-        del /f *_x86.exe.spec 2>nul || echo "Cannot delete x86 spec files" \
-    )
-    @if exist "inno_setup_x64.iss" ( \
-        del /f inno_setup_x64.iss 2>nul || echo "Cannot delete x64 ISS file" \
-    )
-    @if exist "inno_setup_x86.iss" ( \
-        del /f inno_setup_x86.iss 2>nul || echo "Cannot delete x86 ISS file" \
-    )
-    @echo "Clean completed"
+	@if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)" 2>nul
+	@if exist "$(DIST_DIR)" rmdir /s /q "$(DIST_DIR)" 2>nul
+	@if exist "__pycache__" rmdir /s /q "__pycache__" 2>nul
+	@if exist "*.pyc" del /q "*.pyc" 2>nul
 
-# Build Inno Setup installers with improved error handling
-.PHONY: build_installer_64
-build_installer_64: build_64 inno_script_64
-    @echo "Building 64-bit installer..."
-    @if not exist "dist\x64\ObsidianBackup.exe" ( \
-        echo "Error: 64-bit executable not found" & exit /b 1 \
-    )
-    @"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" inno_setup_x64.iss || ( \
-        echo "Error building 64-bit installer" & exit /b 1 \
-    )
-    @echo "64-bit installer built successfully."
+# Testar executáveis
+test:
+	@if exist "dist\$(EXE_64)" (echo ✓ 64-bit OK) else (echo ❌ 64-bit ausente)
+	@if exist "dist\$(EXE_32)" (echo ✓ 32-bit OK) else (echo ❌ 32-bit ausente)
 
-.PHONY: build_installer_32
-build_installer_32: build_32 inno_script_32
-    @echo "Building 32-bit installer..."
-    @if not exist "dist\x86\ObsidianBackup.exe" ( \
-        echo "Error: 32-bit executable not found" & exit /b 1 \
-    )
-    @"$(INNO_SETUP)" inno_setup_x86.iss /Q || ( \
-        echo "Error building 32-bit installer" & exit /b 1 \
-    )
-    @echo "32-bit installer built successfully."
-
-# Build both installers
-.PHONY: installers
-installers: build_installer_64 build_installer_32
+# Ajuda
+help:
+	@echo Comandos disponíveis:
+	@echo   all        - Build completo (limpar + construir + release)
+	@echo   quick      - Build rápido usando script Python
+	@echo   build      - Construir ambos executáveis
+	@echo   build_64   - Construir apenas 64-bit
+	@echo   build_32   - Construir apenas 32-bit
+	@echo   release    - Criar pacote de release
+	@echo   clean      - Limpar arquivos de build
+	@echo   test       - Verificar executáveis
+	@echo   help       - Mostrar esta ajuda

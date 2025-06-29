@@ -1,0 +1,104 @@
+# -*- mode: python ; coding: utf-8 -*-
+
+from PyInstaller.utils.hooks import collect_all
+import os
+import sys
+
+block_cipher = None
+
+# Collect all package data - only include files that exist
+datas = []
+if os.path.exists('icon.ico'):
+    datas.append(('icon.ico', '.'))
+if os.path.exists('settings.json'):
+    datas.append(('settings.json', '.'))
+if os.path.exists('token.pickle'):
+    datas.append(('token.pickle', '.'))
+
+# Collect all necessary packages
+packages = [
+    'google',
+    'google_auth_oauthlib',
+    'googleapiclient',
+    'requests',
+    'requests_oauthlib',
+    'oauthlib'
+]
+
+# Collect all data from packages
+for package in packages:
+    try:
+        binaries, datas_temp, hiddenimports = collect_all(package)
+        datas.extend(datas_temp)
+    except:
+        pass
+
+a = Analysis(
+    ['main.py'],
+    pathex=[],
+    binaries=[],
+    datas=datas,
+    hiddenimports=[
+        'google.auth',
+        'google.auth.transport',
+        'google.auth.transport.requests',
+        'google.oauth2',
+        'google.oauth2.credentials',
+        'google_auth_oauthlib',
+        'google_auth_oauthlib.flow',
+        'googleapiclient',
+        'googleapiclient.discovery',
+        'googleapiclient.http',
+        'googleapiclient.errors',
+        'requests',
+        'requests_oauthlib',
+        'oauthlib',
+        'win32file',
+        'win32api',
+        'win32con',
+        'pywintypes',
+        'tkinter',
+        'tkinter.filedialog',
+        'tkinter.messagebox',
+        'tkinter.ttk',
+        'json',
+        'pickle',
+        'threading',
+        'subprocess',
+        'datetime',
+        'shutil',
+        'pathlib'
+    ],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False
+)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    [],
+    name='ObsidianBackup_x64',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=False,
+    disable_windowed_traceback=False,
+    target_arch='x86_64',
+    codesign_identity=None,
+    entitlements_file=None,
+    icon='icon.ico' if os.path.exists('icon.ico') else None
+)

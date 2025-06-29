@@ -1,15 +1,19 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 from PyInstaller.utils.hooks import collect_all
+import os
+import sys
 
 block_cipher = None
 
-# Collect all package data
-datas = [
-    ('icon.ico', '.'),
-    ('settings.json', '.'),
-    ('token.pickle', '.')
-]
+# Collect all package data - only include files that exist
+datas = []
+if os.path.exists('icon.ico'):
+    datas.append(('icon.ico', '.'))
+if os.path.exists('settings.json'):
+    datas.append(('settings.json', '.'))
+if os.path.exists('token.pickle'):
+    datas.append(('token.pickle', '.'))
 
 # Collect all necessary packages
 packages = [
@@ -42,12 +46,25 @@ a = Analysis(
         'googleapiclient',
         'googleapiclient.discovery',
         'googleapiclient.http',
+        'googleapiclient.errors',
         'requests',
         'requests_oauthlib',
         'oauthlib',
         'win32file',
         'win32api',
-        'win32con'
+        'win32con',
+        'pywintypes',
+        'tkinter',
+        'tkinter.filedialog',
+        'tkinter.messagebox',
+        'tkinter.ttk',
+        'json',
+        'pickle',
+        'threading',
+        'subprocess',
+        'datetime',
+        'shutil',
+        'pathlib'
     ],
     hookspath=[],
     hooksconfig={},
