@@ -57,7 +57,7 @@ powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut 
 if exist "%SHORTCUT%" (
     echo ✓ Atalho criado na area de trabalho
 ) else (
-    echo ⚠ Nao foi possivel criar o atalho na area de trabalho
+    echo ❌ Erro ao criar atalho na area de trabalho
 )
 
 :: Create start menu shortcut
@@ -69,7 +69,7 @@ powershell -Command "$WshShell = New-Object -comObject WScript.Shell; $Shortcut 
 if exist "%STARTSHORTCUT%" (
     echo ✓ Atalho criado no menu iniciar
 ) else (
-    echo ⚠ Nao foi possivel criar o atalho no menu iniciar
+    echo ❌ Erro ao criar atalho no menu iniciar
 )
 
 echo.
