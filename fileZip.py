@@ -31,3 +31,21 @@ def create_backup():
     except Exception as e:
         print(f"Erro ao criar backup: {e}")
         return False
+
+def remove_backup():
+    """Remove o arquivo ZIP gerado pelo backup."""
+    if 'backup_filename' in globals():
+        backup_path = os.path.join(documents_path, backup_filename)
+        try:
+            if os.path.exists(backup_path):
+                os.chmod(backup_path, 0o777)
+                os.remove(backup_path)
+                print(f"Arquivo removido: {backup_path}")
+                return True
+            else:
+                print("Arquivo ZIP não encontrado para remoção.")
+        except Exception as e:
+            print(f"Erro ao remover arquivo ZIP: {e}")
+    else:
+        print("Nenhum arquivo ZIP definido para remoção.")
+    return False

@@ -36,21 +36,21 @@ build: build_64 build_32
 # Build 64-bit
 build_64:
 	@echo Construindo executável 64-bit...
-	@$(PYTHON) -m PyInstaller obsidian_backup_x64.spec --clean >nul
-	@if exist "dist\$(EXE_64)" (echo ✓ 64-bit concluído) else (echo ❌ Falha 64-bit)
+	@$(PYTHON) -m PyInstaller obsidian_backup_x64.spec --clean
+	@if exist "dist\$(EXE_64)" (echo 64-bit concluído) else (echo Falha 64-bit)
 
 # Build 32-bit
 build_32:
 	@echo Construindo executável 32-bit...
 	@$(PYTHON) -m PyInstaller obsidian_backup_x86.spec --clean >nul
-	@if exist "dist\$(EXE_32)" (echo ✓ 32-bit concluído) else (echo ❌ Falha 32-bit)
+	@if exist "dist\$(EXE_32)" (echo 32-bit concluído) else (echo Falha 32-bit)
 
 # Criar pacote de release
 release:
 	@echo Criando pacote de release...
 	@$(PYTHON) release.py --create-zip >nul
 	@$(PYTHON) prepare_release.py >nul
-	@echo ✓ Release preparado
+	@echo Release preparado
 
 # Limpar arquivos
 clean:

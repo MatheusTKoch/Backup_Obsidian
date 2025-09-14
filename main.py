@@ -13,6 +13,7 @@ import threading
 import shutil
 from pathlib import Path
 import win32file
+import fileZip
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
 
@@ -533,11 +534,7 @@ mas é necessário que o computador esteja ligado no horário agendado.
             self.progress["value"] = 70
             
             self.log("Iniciando upload para o Google Drive...")
-            
-            arquivo_metada = {
-                'name': backup_filename
-            }
-            
+            arquivo_metada = {'name': backup_filename}
             media = MediaFileUpload(
                 backup_path,
                 resumable=True
@@ -567,7 +564,7 @@ mas é necessário que o computador esteja ligado no horário agendado.
                         import gc
                         gc.collect()
                         os.chmod(backup_path, 0o777) 
-                        os.unlink(backup_path)
+                        os.remove(backup_path)
                         self.log("Arquivo ZIP local removido")
                         break
                 except PermissionError:
@@ -581,6 +578,8 @@ mas é necessário que o computador esteja ligado no horário agendado.
             if attempt == max_attempts:
                 self.log("Não foi possível remover o arquivo ZIP automaticamente.")
                 self.log(f"Por favor, remova manualmente: {backup_path}")
+            
+            fileZip.remove_backup()
             
             messagebox.showinfo("Backup Concluído", "Backup do Obsidian Vault realizado com sucesso!")
             
@@ -653,11 +652,12 @@ def run_headless_backup():
         
         print(f"Upload concluído! ID do arquivo: {file.get('id')}")
         
-        try:
-            os.remove(backup_path)
+        # Remoção robusta do arquivo ZIP local
+        import fileZip
+        if fileZip.remove_backup():
             print("Arquivo ZIP local removido")
-        except Exception as e:
-            print(f"Aviso: Não foi possível remover o arquivo ZIP local: {e}")
+        else:
+            print(f"Aviso: Não foi possível remover o arquivo ZIP local: {backup_path}")
         
         print("Backup concluído com sucesso!")
         
